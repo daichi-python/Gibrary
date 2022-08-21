@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  gibrary_test_db:
+    build:
+      context: ./db
+      dockerfile: dockerfile
+    ports:
+      - 23306:23306
+
+  gibrary_test_server:
+    build:
+      context: ./server
+      dockerfile: dockerfile-test
+    ports:
+      - 40000:40000
+    depends_on:
+      - gibrary_test_db

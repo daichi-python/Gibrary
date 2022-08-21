@@ -1,0 +1,11 @@
+{
+    "signup": {
+        "title": "Sign up",
+        "google": "Sign up with Google.",
+        "facebook": "Sign up with Facebook.",
+        "or": "or",
+        "button": "CONFIRM",
+        "switch": "If you already have account",
+        "switchButton": "SIGN IN"        
+    }
+}

@@ -1,0 +1,16 @@
+FROM golang:1.17-alpine
+
+WORKDIR /usr/local/go/src/server
+
+COPY server/go.mod .
+COPY server/go.sum .
+COPY server/.env .
+
+RUN go mod download
+
+RUN apk add gcc
+RUN apk add musl-dev
+
+COPY ./server .
+
+CMD ["go", "test", "-v",  "./cmd/database", "./cmd/converter", "-count=1"]

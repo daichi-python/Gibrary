@@ -1,0 +1,10 @@
+FROM mysql:8.0
+
+ADD ./conf/my.cnf /etc/mysql/conf.d/my.cnf
+ADD ./tmp/test.sql /etc/mysql/
+
+COPY ./sqls/* /docker-entrypoint-initdb.d
+
+ENV MYSQL_ROOT_PASSWORD=Dt190416(0630)
+
+CMD [ "mysqld" ]

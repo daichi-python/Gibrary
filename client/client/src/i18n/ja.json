@@ -1,0 +1,11 @@
+{
+    "signup": {
+        "title": "会員登録",
+        "google": "Google で登録",
+        "facebook": "Facebook で登録",
+        "or": "または",
+        "button": "登録",
+        "switch": "アカウントを持っている方は",
+        "switchButton": "ログイン"        
+    }
+}

@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  gibrary_db:
+    build:
+      context: ./db
+      dockerfile: dockerfile
+    ports:
+      - 13306:13306
+
+  gibrary_server:
+    build:
+      context: ./server
+      dockerfile: dockerfile
+    ports:
+      - 4000:4000
+    depends_on:
+      - gibrary_db
