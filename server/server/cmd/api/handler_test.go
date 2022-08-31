@@ -68,6 +68,53 @@ func TestUpdateUserHandler(t *testing.T) {
 	assert.Equal(t, user.Birthday, res_user.Birthday)
 }
 
+func TestGetUserHandler(t *testing.T) {
+	// Test sending a request with an ID
+	user := converter.User{
+		ID: user_id,
+	}
+
+	data, err := json.Marshal(user)
+	assert.Nil(t, err)
+
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, url+"/user/get", bytes.NewBuffer(data))
+	assert.Nil(t, err)
+
+	res, err := client.Do(req)
+	assert.Nil(t, err)
+
+	var res_user converter.User
+	b, _ := io.ReadAll(res.Body)
+	err = json.Unmarshal(b, &res_user)
+	assert.Nil(t, err)
+
+	assert.Equal(t, res_user.ID, user_id)
+	assert.NotNil(t, res_user.Email)
+
+	// Test sending a request with an email address
+	user = converter.User{
+		Email: res_user.Email,
+	}
+
+	data, err = json.Marshal(user)
+	assert.Nil(t, err)
+
+	client = &http.Client{}
+	req, err = http.NewRequest(http.MethodGet, url+"/user/get", bytes.NewBuffer(data))
+	assert.Nil(t, err)
+
+	res, err = client.Do(req)
+	assert.Nil(t, err)
+
+	var res_user2 converter.User
+	b, _ = io.ReadAll(res.Body)
+	err = json.Unmarshal(b, &res_user2)
+	assert.Nil(t, err)
+
+	assert.Equal(t, res_user.ID, res_user2.ID)
+}
+
 func TestCreateGroupyHandler(t *testing.T) {
 	groupy := converter.Groupy{
 		Name:      generateRandomString(10),
@@ -151,6 +198,10 @@ func TestDeleteGroupyHandler(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, groupy.ID, res_groupy.ID)
+}
+
+func TestGetGroupyHandler(t *testing.T) {
+
 }
 
 func TestUserInGroupyHandler(t *testing.T) {

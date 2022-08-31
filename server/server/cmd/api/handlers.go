@@ -3,15 +3,18 @@ package api
 import (
 	"fmt"
 	"net/http"
+
 	"server/cmd/converter"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
+// UserHandler accepts GET, POST, and UPDATE methods.
 func (APIc *APIController) UserHandler(c *gin.Context) {
 	switch c.Request.Method {
 	case http.MethodPost:
+		// Create a user structure from a JSON request.
 		var user converter.User
 		if err := c.ShouldBindJSON(&user); err != nil {
 			InternalServerError(c)
@@ -81,20 +84,29 @@ func (APIc *APIController) UserHandler(c *gin.Context) {
 		}
 
 		params := converter.ToSelectQueryParams(user)
-		row := APIc.DBc.SelectUser(params)
-		res_user, err := converter.UserRowToStruct(row)
+		row, err := APIc.DBc.SelectUser(params)
+		if err != nil {
+			InternalServerError(c)
+			logrus.WithFields(logrus.Fields{
+				"Method":     c.Request.Method,
+				"RequestURL": c.Request.URL,
+				"Function":   "SelectUser",
+			}).Errorln("Query execution failed.")
+			return
+		}
+
+		users, err := converter.UserRowsToStruct(row)
 		if err != nil {
 			InternalServerError(c)
 			logrus.WithFields(logrus.Fields{
 				"Error":      err,
-				"Function":   "UserRowToStruct",
+				"Function":   "UserRowsToStruct",
 				"RequestURL": c.Request.URL,
 			}).Errorln("An error occurred during the execution of UserRowToStruct")
 		}
 
-		c.IndentedJSON(http.StatusOK, res_user)
+		c.IndentedJSON(http.StatusOK, users)
 		logrus.WithFields(logrus.Fields{
-			"ID":     res_user.ID,
 			"Method": http.MethodGet,
 		}).Debugln("UserHandler has completed successfully.")
 
@@ -193,6 +205,16 @@ func (APIc *APIController) GroupHandler(c *gin.Context) {
 
 		c.IndentedJSON(http.StatusOK, groupy)
 		logrus.WithField("ID", groupy.ID).Debugln("GroupyHandler has completed successfully.")
+
+	case http.MethodGet:
+		var groupy converter.Groupy
+		if err := c.ShouldBindJSON(&groupy); err != nil {
+			logrus.WithFields(logrus.Fields{
+				"Method":     c.Request.Method,
+				"RequestURL": c.Request.URL,
+				"Error":      err,
+			}).Errorln("Bind of groupy struct and json request failed.")
+		}
 
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -513,5 +535,11 @@ func (APIc *APIController) UserLikeBoardItemHandler(c *gin.Context) {
 func InternalServerError(c *gin.Context) {
 	c.JSON(http.StatusInternalServerError, gin.H{
 		"Message": "Please allow time for access.",
+	})
+}
+
+func BadRequest(c *gin.Context) {
+	c.JSON(http.StatusBadRequest, gin.H{
+		"Message": "Request does not contain the required values.",
 	})
 }

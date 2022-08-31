@@ -46,21 +46,21 @@ INSERT INTO board_items(type, category, title, detail) VALUES(1, 3, "Bank", "Ban
 INSERT INTO board_items(type, category, title, detail) VALUES(1, 1, "SB", "SB board item.");
 INSERT INTO board_items(type, category, title, detail) VALUES(2, 1, "Card Game", "Card game board item.");
 
-INSERT INTO groupy_board_items(groupy, boardItem) VALUES(1, 1);
-INSERT INTO groupy_board_items(groupy, boardItem) VALUES(2, 2);
-INSERT INTO groupy_board_items(groupy, boardItem) VALUES(3, 3);
-INSERT INTO groupy_board_items(groupy, boardItem) VALUES(4, 4);
-INSERT INTO groupy_board_items(groupy, boardItem) VALUES(5, 5);
-INSERT INTO groupy_board_items(groupy, boardItem) VALUES(6, 6);
-INSERT INTO groupy_board_items(groupy, boardItem) VALUES(7, 7);
+INSERT INTO groupy_board_items(groupy, board_item) VALUES(1, 1);
+INSERT INTO groupy_board_items(groupy, board_item) VALUES(2, 2);
+INSERT INTO groupy_board_items(groupy, board_item) VALUES(3, 3);
+INSERT INTO groupy_board_items(groupy, board_item) VALUES(4, 4);
+INSERT INTO groupy_board_items(groupy, board_item) VALUES(5, 5);
+INSERT INTO groupy_board_items(groupy, board_item) VALUES(6, 6);
+INSERT INTO groupy_board_items(groupy, board_item) VALUES(7, 7);
 
-INSERT INTO user_like_board_items(user, boardItem) VALUES(1, 1);
-INSERT INTO user_like_board_items(user, boardItem) VALUES(2, 2);
-INSERT INTO user_like_board_items(user, boardItem) VALUES(3, 3);
-INSERT INTO user_like_board_items(user, boardItem) VALUES(4, 4);
-INSERT INTO user_like_board_items(user, boardItem) VALUES(5, 5);
-INSERT INTO user_like_board_items(user, boardItem) VALUES(6, 6);
-INSERT INTO user_like_board_items(user, boardItem) VALUES(7, 7);
+INSERT INTO user_like_board_items(user, board_item) VALUES(1, 1);
+INSERT INTO user_like_board_items(user, board_item) VALUES(2, 2);
+INSERT INTO user_like_board_items(user, board_item) VALUES(3, 3);
+INSERT INTO user_like_board_items(user, board_item) VALUES(4, 4);
+INSERT INTO user_like_board_items(user, board_item) VALUES(5, 5);
+INSERT INTO user_like_board_items(user, board_item) VALUES(6, 6);
+INSERT INTO user_like_board_items(user, board_item) VALUES(7, 7);
 
 INSERT INTO home_items(detail) VALUES("Power Center");
 INSERT INTO home_items(detail) VALUES("Cloud Data Integration");
@@ -70,10 +70,10 @@ INSERT INTO home_items(detail) VALUES("API Manager");
 INSERT INTO home_items(detail) VALUES("Data Quality");
 INSERT INTO home_items(detail) VALUES("Process Engine");
 
-INSERT INTO post_home_items(user, homeitem) VALUES(1, 1);
-INSERT INTO post_home_items(groupy, homeitem) VALUES(2, 2);
-INSERT INTO post_home_items(groupy, homeitem) VALUES(3, 3);
-INSERT INTO post_home_items(user, homeitem) VALUES(4, 4);
-INSERT INTO post_home_items(groupy, homeitem) VALUES(5, 5);
-INSERT INTO post_home_items(user, homeitem) VALUES(6, 6);
-INSERT INTO post_home_items(groupy, homeitem) VALUES(7, 7);
+INSERT INTO post_home_items(user, home_item) VALUES(1, 1);
+INSERT INTO post_home_items(groupy, home_item) VALUES(2, 2);
+INSERT INTO post_home_items(groupy, home_item) VALUES(3, 3);
+INSERT INTO post_home_items(user, home_item) VALUES(4, 4);
+INSERT INTO post_home_items(groupy, home_item) VALUES(5, 5);
+INSERT INTO post_home_items(user, home_item) VALUES(6, 6);
+INSERT INTO post_home_items(groupy, home_item) VALUES(7, 7);

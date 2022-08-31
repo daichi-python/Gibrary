@@ -2,11 +2,11 @@ USE gibrary;
 
 CREATE TABLE IF NOT EXISTS types (
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    data VARCHAR(10) NOT NULL,
+    type VARCHAR(10) NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-INSERT INTO types(data) VALUES("online");
-INSERT INTO types(data) VALUES("facing");
-INSERT INTO types(data) VALUES("other");
+INSERT INTO types(type) VALUES("online");
+INSERT INTO types(type) VALUES("facing");
+INSERT INTO types(type) VALUES("other");

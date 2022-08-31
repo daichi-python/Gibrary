@@ -7,6 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// The database can be accessed within the Handler
+// because the DBController is owned within the structure.
 type APIController struct {
 	DBc *database.DBController
 }
@@ -23,6 +25,7 @@ func Setup(APIc APIController) *gin.Engine {
 
 	router.POST("/user/create", APIc.UserHandler)
 	router.PUT("/user/update", APIc.UserHandler)
+	router.GET("/user/get", APIc.UserHandler)
 
 	router.POST("/groupy/create", APIc.GroupHandler)
 	router.PUT("/groupy/update", APIc.GroupHandler)

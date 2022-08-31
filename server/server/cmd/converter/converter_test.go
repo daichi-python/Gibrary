@@ -47,10 +47,14 @@ func TestToInsertQueryParams(t *testing.T) {
 	user := User{}
 	user.Email = fmt.Sprintf("%s@gmail.com", generateRandomString(21))
 	user.Name = generateRandomString(10)
+	user.Is_active = "TRUE"
+	user.Birthday = "2000-06-30"
 
 	params := ToInsertQueryParams(user)
 	assert.Equal(t, user.Email, params["email"])
 	assert.Equal(t, user.Name, params["name"])
+	assert.Equal(t, user.Is_active, params["is_active"])
+	assert.Equal(t, user.Birthday, params["birthday"])
 }
 
 func TestUpdateQueryParams(t *testing.T) {
@@ -76,11 +80,12 @@ func TestUserRowToSelect(t *testing.T) {
 	params := database.QueryParams{
 		"id": "1",
 	}
-	row := controller.SelectUser(params)
-	user, err := UserRowToStruct(row)
+	rows, err := controller.SelectUser(params)
 	assert.Nil(t, err)
-	assert.Equal(t, user.ID, "1")
-	assert.Contains(t, user.Email, "@gmail.com")
+
+	users, err := UserRowsToStruct(rows)
+	assert.Nil(t, err)
+	assert.Equal(t, len(users), 1)
 }
 
 func generateRandomString(num int) string {

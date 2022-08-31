@@ -3,8 +3,9 @@ package converter
 import (
 	"database/sql"
 	"reflect"
-	"server/cmd/database"
 	"strings"
+
+	"server/cmd/database"
 
 	"github.com/sirupsen/logrus"
 )
@@ -76,27 +77,55 @@ func ToSelectQueryParams(s JsonStruct) database.QueryParams {
 	return params
 }
 
-//TODO
-//VALUEがNULLの場合でも上手く動作するように編集する。
-func UserRowToStruct(row *sql.Row) (*User, error) {
-	var user User
-	var id, name, email, gender, birthday, is_active string
+func UserRowsToStruct(rows *sql.Rows) ([]User, error) {
+	var users []User
 
-	err := row.Scan(&id, &name, &email, &gender, &birthday, &is_active)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"Row":   "User",
-			"Error": err,
-		}).Errorln("Failed to scan record.")
-		return nil, err
+	for rows.Next() {
+		var user User
+		err := rows.Scan(&user.ID, &user.Name, &user.Email, &user.Gender, &user.Birthday, &user.Is_active)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"Row":   "User",
+				"Error": err,
+			}).Errorln("Failed to scan user record.")
+			return nil, err
+		}
+		users = append(users, user)
 	}
+	return users, nil
+}
 
-	user.ID = id
-	user.Name = name
-	user.Email = email
-	user.Gender = gender
-	user.Birthday = birthday
-	user.Is_active = is_active
+func GroupyRowsToStruct(rows *sql.Rows) ([]Groupy, error) {
+	var groupies []Groupy
 
-	return &user, nil
+	for rows.Next() {
+		var groupy Groupy
+		err := rows.Scan(&groupy.ID, &groupy.Name, &groupy.Introduce, &groupy.Max_people, &groupy.Group_key, &groupy.Is_opened)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"Row":   "Groupy",
+				"Error": err,
+			}).Errorln("Failed to scan groupy record.")
+			return nil, err
+		}
+		groupies = append(groupies, groupy)
+	}
+	return groupies, nil
+}
+
+func UserInGroupyRowsToStruct(rows *sql.Rows) ([]UserInGroupy, error) {
+	var uigs []UserInGroupy
+
+	for rows.Next() {
+		var uig UserInGroupy
+		err := rows.Scan(&uig.ID, &uig.User, &uig.Groupy)
+		if err != nil {
+			logrus.WithFields(logrus.Fields{
+				"Row":   "UserInGroupy",
+				"Error": err,
+			}).Errorln("Failed to scan UserInGroupy record.")
+		}
+		uigs = append(uigs, uig)
+	}
+	return uigs, nil
 }

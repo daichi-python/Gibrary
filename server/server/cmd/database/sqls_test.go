@@ -1,4 +1,4 @@
-package database
+package database_test
 
 import (
 	"database/sql"
@@ -6,6 +6,8 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"server/cmd/converter"
+	"server/cmd/database"
 	"testing"
 	"time"
 
@@ -13,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var controller *DBController
+var controller *database.DBController
 
 var (
 	user_id       int64
@@ -39,20 +41,19 @@ func setup() {
 		log.Println("Error: Failed to connect MySQL server.")
 	}
 
-	controller = NewDBController(dbEngine)
+	controller = database.NewDBController(dbEngine)
 }
 
 func TestMain(m *testing.M) {
 	setup()
 	log.Println("SUCCESS: START TEST")
 	code := m.Run()
-	controller.db.Exec("DELETE FROM users;")
 	os.Exit(code)
 }
 
 func TestInsertUser(t *testing.T) {
 	email := generateRandomString(20)
-	params := QueryParams{
+	params := database.QueryParams{
 		"email": fmt.Sprintf("%s@gmail.com", email),
 		"name":  "富永大地",
 	}
@@ -64,7 +65,7 @@ func TestInsertUser(t *testing.T) {
 }
 
 func TestUpdateUser(t *testing.T) {
-	params := QueryParams{
+	params := database.QueryParams{
 		"name":      "富永台地",
 		"is_active": "FALSE",
 	}
@@ -73,8 +74,30 @@ func TestUpdateUser(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestSelectUser(t *testing.T) {
+	params := database.QueryParams{
+		"id": fmt.Sprint(user_id),
+	}
+
+	rows, err := controller.SelectUser(params)
+	assert.Nil(t, err)
+
+	users, err := converter.UserRowsToStruct(rows)
+	assert.Nil(t, err)
+	assert.Equal(t, len(users), 1)
+
+	user := users[0]
+
+	params = database.QueryParams{
+		"email": user.Email,
+	}
+
+	_, err = controller.SelectUser(params)
+	assert.Nil(t, err)
+}
+
 func TestInsertAndDeleteGroupy(t *testing.T) {
-	params := QueryParams{
+	params := database.QueryParams{
 		"name":      "富永家",
 		"introduce": generateRandomString(100),
 	}
@@ -84,7 +107,7 @@ func TestInsertAndDeleteGroupy(t *testing.T) {
 
 	groupy_id, _ = result.LastInsertId()
 
-	params2 := QueryParams{
+	params2 := database.QueryParams{
 		"name":      generateRandomString(10),
 		"introduce": generateRandomString(100),
 	}
@@ -98,7 +121,7 @@ func TestInsertAndDeleteGroupy(t *testing.T) {
 }
 
 func TestUpdateGroupy(t *testing.T) {
-	params := QueryParams{
+	params := database.QueryParams{
 		"name":       "富永屋",
 		"max_people": "70",
 	}
@@ -108,7 +131,7 @@ func TestUpdateGroupy(t *testing.T) {
 }
 
 func TestInsertAndDeleteUserInGroupy(t *testing.T) {
-	params := QueryParams{
+	params := database.QueryParams{
 		"User":   fmt.Sprint(user_id),
 		"Groupy": fmt.Sprint(groupy_id),
 	}
@@ -122,9 +145,9 @@ func TestInsertAndDeleteUserInGroupy(t *testing.T) {
 }
 
 func TestInsertAndDeleteBoardItem(t *testing.T) {
-	params := QueryParams{
-		"Type":     "1",
-		"Category": "2",
+	params := database.QueryParams{
+		"type":     "1",
+		"category": "2",
 		"title":    generateRandomString(10),
 	}
 
@@ -133,7 +156,7 @@ func TestInsertAndDeleteBoardItem(t *testing.T) {
 
 	board_item_id, _ = result.LastInsertId()
 
-	params2 := QueryParams{
+	params2 := database.QueryParams{
 		"Type":     "2",
 		"Category": "1",
 		"title":    generateRandomString(10),
@@ -148,7 +171,7 @@ func TestInsertAndDeleteBoardItem(t *testing.T) {
 }
 
 func TestUpdateBoardItem(t *testing.T) {
-	params := QueryParams{
+	params := database.QueryParams{
 		"title":      "updated title",
 		"detail":     generateRandomString(100),
 		"applicants": "20",
@@ -159,9 +182,9 @@ func TestUpdateBoardItem(t *testing.T) {
 }
 
 func TestInsertAndDeleteGroupyBoardItem(t *testing.T) {
-	params := QueryParams{
-		"Groupy":    fmt.Sprint(groupy_id),
-		"BoardItem": fmt.Sprint(board_item_id),
+	params := database.QueryParams{
+		"groupy":     fmt.Sprint(groupy_id),
+		"board_item": fmt.Sprint(board_item_id),
 	}
 
 	result, err := controller.InsertGroupyBoardItem(params)
@@ -173,9 +196,9 @@ func TestInsertAndDeleteGroupyBoardItem(t *testing.T) {
 }
 
 func TestInsertAndDeleteUserLikeBoardItem(t *testing.T) {
-	params := QueryParams{
-		"User":      fmt.Sprint(user_id),
-		"BoardItem": fmt.Sprint(board_item_id),
+	params := database.QueryParams{
+		"user":       fmt.Sprint(user_id),
+		"board_item": fmt.Sprint(board_item_id),
 	}
 
 	result, err := controller.InsertUserLikeBoardItem(params)
@@ -187,8 +210,8 @@ func TestInsertAndDeleteUserLikeBoardItem(t *testing.T) {
 }
 
 func TestInsertAndDeleteHomeItem(t *testing.T) {
-	params := QueryParams{
-		"Detail": generateRandomString(30),
+	params := database.QueryParams{
+		"detail": generateRandomString(30),
 	}
 
 	result, err := controller.InsertHomeItem(params)
@@ -205,8 +228,8 @@ func TestInsertAndDeleteHomeItem(t *testing.T) {
 }
 
 func TestUpdateHomeItem(t *testing.T) {
-	params := QueryParams{
-		"Detail": generateRandomString(20),
+	params := database.QueryParams{
+		"detail": generateRandomString(20),
 	}
 
 	_, err := controller.UpdateHomeItem(fmt.Sprint(home_item_id), params)

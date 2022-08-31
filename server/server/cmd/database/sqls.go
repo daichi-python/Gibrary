@@ -11,8 +11,6 @@ import (
 
 type QueryParams map[string]string
 
-type ColumnParams []string
-
 func (DBc *DBController) InsertUser(params QueryParams) (sql.Result, error) {
 	query := InsertQueryHelper("users", params)
 	logrus.WithFields(logrus.Fields{
@@ -52,14 +50,27 @@ func (DBc *DBController) UpdateUser(id string, params QueryParams) (sql.Result, 
 }
 
 // The only values that params accepts are ID or EMAIL.
-func (DBc *DBController) SelectUser(params QueryParams) *sql.Row {
+func (DBc *DBController) SelectUser(params QueryParams) (*sql.Rows, error) {
 	columns := ColumnParams{
 		"id", "name", "email", "gender", "birthday", "is_active",
 	}
 	query := SelectQueryHelper("users", params, columns)
+	logrus.WithFields(logrus.Fields{
+		"Query": query,
+		"Table": "users",
+	}).Debugln("[--SelectUser--] prepared query.")
 
-	row := DBc.db.QueryRow(query)
-	return row
+	rows, err := DBc.db.Query(query)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"Table": "users",
+			"Error": err,
+			"Query": query,
+		}).Errorln("Failed to retrieve user record.")
+		return nil, err
+	}
+
+	return rows, nil
 }
 
 func (DBc *DBController) InsertGroupy(params QueryParams) (sql.Result, error) {
@@ -366,30 +377,47 @@ func DeleteQueryHelper(table, id string) string {
 	return query
 }
 
-// Receive a single param
 func SelectQueryHelper(table string, params QueryParams, cp ColumnParams) string {
+	// Create a query for the column to be retrieved.
 	columns := ""
 	for _, value := range cp {
-		columns += fmt.Sprintf("%s, ", value)
+		columns += fmt.Sprintf("COALESCE(%s, '') AS %s, ", value, value)
 	}
+	columns = columns[:len(columns)-2]
 
-	values := ""
+	// For email, return an exact match query.
+	// If value is a number, compare with equal.
+	// If value is a string, use LIKE to return a partial match query.
+	values := "WHERE "
 	for key, value := range params {
-		if _, err := strconv.Atoi(value); err == nil {
-			values += fmt.Sprintf("WHERE %s = %s", key, value)
+		if key == "email" {
+			values += fmt.Sprintf("%s = '%s', ", key, value)
+
+		} else if _, err := strconv.Atoi(value); err == nil {
+			values += fmt.Sprintf("%s = %s, ", key, value)
+
 		} else {
-			pm := "%" + value + "%"
-			values += fmt.Sprintf("WHERE %s LIKE %s", key, pm)
+			pm := "'%" + value + "%'"
+			values += fmt.Sprintf("%s LIKE %s, ", key, pm)
 		}
 	}
+	values = values[:len(values)-2]
 
-	query := fmt.Sprintf("SELECT %s FROM %s %s;", columns[:len(columns)-2], table, values)
+	query := fmt.Sprintf("SELECT %s FROM %s %s;", columns, table, values)
 
 	return query
 }
 
 // Helper function to score each column and extract records with a default score or higher
-func SelectQueryWitchCaseHelper(table string, params QueryParams, meter int) string {
+func SelectQueryWitchCaseHelper(table string, params QueryParams, cp ColumnParams, meter int) string {
+	// Create a query for the column to be retrieved.
+	columns := ""
+	for _, column := range cp {
+		columns += fmt.Sprintf("COALESCE(%s, '') AS %s, ", column, column)
+	}
+	columns = columns[:len(columns)-2]
+
+	// Create a Case query
 	caseQuery := ""
 	total := ""
 
@@ -405,7 +433,10 @@ func SelectQueryWitchCaseHelper(table string, params QueryParams, meter int) str
 		}
 	}
 
-	query := fmt.Sprintf("SELECT *, %s AS total FROM (SELECT *, %s FROM %s) AS temp_table HAVING total >= %v ORDER BY total DESC;", total, caseQuery, table, meter)
+	query := fmt.Sprintf(
+		"SELECT %s, %s AS total FROM (SELECT *, %s FROM %s) AS temp_table HAVING total >= %v ORDER BY total DESC;",
+		columns, total, caseQuery, table, meter,
+	)
 
 	return query
 }
